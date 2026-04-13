@@ -83,7 +83,10 @@ exports.approveTicket = async (req, res) => {
       return res.status(404).json({ msg: "Ticket not found" });
     }
 
-    const qrData = `http://localhost:5000/api/tickets/verify/${ticket._id}`;
+    const BASE_URL = process.env.BASE_URL || "http://localhost:5000";
+
+    const qrData = `${BASE_URL}/api/tickets/verify/${ticket._id}`;
+
     const qr = await QRCode.toDataURL(qrData);
 
     ticket.status = "approved";
