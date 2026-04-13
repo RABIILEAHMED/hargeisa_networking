@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { Users, Ticket as TicketIcon, Clock } from "lucide-react";
 import RoundTable from "./RoundTable";
 import EventGallery2025 from "./EventGallery2025";
-import Footer from "../components/footer/Footer";
+import Footer from "../components/Footer/Footer";
 
 export default function Home() {
   const { isAuth } = useContext(AuthContext);

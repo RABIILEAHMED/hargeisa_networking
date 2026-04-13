@@ -17,9 +17,14 @@ const app = express();
 // 🔌 Connect DB
 connectDB();
 
-// ⚡ Middleware
+// ==============================
+// ⚡ MIDDLEWARE
+// ==============================
+
+// 🔐 CORS (PRODUCTION SAFE)
 app.use(cors({
-  origin: "*",
+  origin: process.env.CLIENT_URL || "*",
+  credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"]
 }));
 
@@ -29,7 +34,10 @@ app.use(express.urlencoded({ extended: true }));
 // 📁 Static folder
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
-// 📦 Routes
+// ==============================
+// 📦 ROUTES
+// ==============================
+
 app.use("/api/auth", authRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/gallery", galleryRoutes);
@@ -39,13 +47,19 @@ app.get("/", (req, res) => {
   res.send("API Running...");
 });
 
+// ==============================
 // ⚡ CREATE HTTP SERVER
+// ==============================
+
 const server = http.createServer(app);
 
+// ==============================
 // 🔥 SOCKET.IO
+// ==============================
+
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: process.env.CLIENT_URL || "*",
     methods: ["GET", "POST"]
   }
 });
@@ -63,7 +77,7 @@ let queuePositions = {};
 io.on("connection", (socket) => {
   console.log("✅ User connected:", socket.id);
 
-  connectedUsers++;
+  connectedUsers = Math.max(connectedUsers + 1, 0);
 
   socket.emit("notification", {
     message: "🔥 Connected to realtime server!"
@@ -82,7 +96,9 @@ io.on("connection", (socket) => {
 
   const interval = setInterval(() => {
     Object.keys(queuePositions).forEach((userId) => {
-      if (queuePositions[userId] > 1) queuePositions[userId]--;
+      if (queuePositions[userId] > 1) {
+        queuePositions[userId]--;
+      }
     });
 
     io.emit("queueUpdateGlobal", queuePositions);
@@ -95,7 +111,7 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("❌ User disconnected:", socket.id);
 
-    connectedUsers--;
+    connectedUsers = Math.max(connectedUsers - 1, 0);
 
     io.emit("users", { total: connectedUsers });
 
