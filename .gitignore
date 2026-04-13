@@ -1,0 +1,27 @@
+# dependencies
+node_modules/
+
+# env files (VERY IMPORTANT 🚨)
+.env
+.env.local
+.env.development
+.env.production
+
+# logs
+logs
+*.log
+npm-debug.log*
+
+# build folders
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel
+
+# uploads (haddii aad local upload isticmaaleyso)
+uploads/
