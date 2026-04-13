@@ -9,7 +9,7 @@ export default function Attendees({ tickets = [] }) {
   const [selectedUser, setSelectedUser] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState(0);
 
-  const BASE_URL = "http://localhost:5000";
+const BASE_URL = "https://hargeisa-connect.onrender.com";
 
   // ✅ SOCKET
   useEffect(() => {

@@ -8,8 +8,8 @@ export default function EditProfile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const token = localStorage.getItem("token");
-  const BASE_URL = "http://localhost:5000";
+const token = localStorage.getItem("token");
+const BASE_URL = "https://hargeisa-connect.onrender.com";
 
   useEffect(() => {
     fetchUser();

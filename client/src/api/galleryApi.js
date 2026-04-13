@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "http://localhost:5000/api/gallery";
+const API = "https://hargeisa-connect.onrender.com";
 
 // 📤 UPLOAD IMAGE
 export const uploadImage = (formData) => {

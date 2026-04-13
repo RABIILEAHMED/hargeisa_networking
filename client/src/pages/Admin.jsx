@@ -19,7 +19,7 @@ export default function Admin() {
   const [showGallery, setShowGallery] = useState(false);
 
   const token = localStorage.getItem("token");
-  const API = "http://localhost:5000";
+  const API = "https://hargeisa-connect.onrender.com";
 
   const soundRef = useRef(new Audio("/sounds/notify.mp3"));
 

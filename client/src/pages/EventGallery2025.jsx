@@ -11,7 +11,7 @@ import {
 import GalleryCard from "../components/gallery/GalleryCard";
 import GalleryModal from "../components/gallery/GalleryModal";
 
-const socket = io("http://localhost:5000");
+const socket = io("https://hargeisa-connect.onrender.com");
 
 export default function EventGallery2025() {
   const [images, setImages] = useState([]);

@@ -21,7 +21,7 @@ export default function Dashboard() {
     localStorage.getItem("darkMode") === "false" ? false : true
   );
 
-  const API = "http://localhost:5000";
+const API = "https://hargeisa-connect.onrender.com";
 
   // =========================
   // 🔁 FETCH USER

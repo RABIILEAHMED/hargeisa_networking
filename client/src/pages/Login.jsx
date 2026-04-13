@@ -30,9 +30,9 @@ export default function Login() {
       setLoading(true);
 
       const res = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        form
-      );
+  "https://hargeisa-connect.onrender.com/api/auth/login",
+  form
+);
 
       const { token, user } = res.data;
 
