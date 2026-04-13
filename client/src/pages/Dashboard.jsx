@@ -4,7 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar"; // ✅ NEW
 import { Toaster, toast } from "react-hot-toast";
-import { io } from "socket.io-client";
+import socket from "../socket";
 
 import Profile from "./Profile";
 import EditProfile from "./EditProfile";
@@ -68,16 +68,21 @@ const API = "https://hargeisa-connect.onrender.com";
   // =========================
   // ⚡ SOCKET REALTIME
   // =========================
-  useEffect(() => {
-    const socket = io(API, { transports: ["websocket"] });
+ useEffect(() => {
+  socket.on("connect", () => {
+    console.log("🔥 Connected:", socket.id);
+  });
 
-    socket.on("notification", (data) => {
-      toast.success(data.message);
-      fetchMyTicket();
-    });
+  socket.on("notification", (data) => {
+    toast.success(data.message);
+    fetchMyTicket();
+  });
 
-    return () => socket.disconnect();
-  }, []);
+  return () => {
+    socket.off("connect");
+    socket.off("notification");
+  };
+}, []);
 
   // =========================
   // 🌙 DARK MODE

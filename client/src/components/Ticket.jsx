@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { io } from "socket.io-client";
+import socket from "../socket";
 
 import TicketCard from "../components/TicketCard";
 import MyTicket from "./MyTickets";
@@ -49,15 +49,20 @@ const API = "https://hargeisa-connect.onrender.com";
   }, []);
 
   // ⚡ SOCKET
-  useEffect(() => {
-    const socket = io(API);
+useEffect(() => {
+  socket.on("connect", () => {
+    console.log("🔥 Connected:", socket.id);
+  });
 
-    socket.on("queueUpdate", (data) => {
-      setQueuePos(data.position);
-    });
+  socket.on("queueUpdate", (data) => {
+    setQueuePos(data.position);
+  });
 
-    return () => socket.disconnect();
-  }, []);
+  return () => {
+    socket.off("connect");
+    socket.off("queueUpdate");
+  };
+}, []);
 
   // 💰 CURRENT PRICE
   const selectedTicket = ticketTypes.find(t => t.type === selectedType);

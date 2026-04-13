@@ -1,7 +1,6 @@
 require("dotenv").config();
 
 const express = require("express");
-const cors = require("cors");
 const http = require("http");
 const path = require("path");
 const { Server } = require("socket.io");
@@ -31,49 +30,38 @@ const allowedOrigins = [
   "https://hargeisa-networking.vercel.app"
 ];
 
-// helper
 const normalizeOrigin = (origin) => {
   if (!origin) return origin;
   return origin.replace(/\/$/, "");
 };
 
 // ==============================
-// ⚡ CORS CONFIG
-// ==============================
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-
-    const cleanOrigin = normalizeOrigin(origin);
-
-    if (allowedOrigins.includes(cleanOrigin)) {
-      return callback(null, true);
-    }
-
-    console.log("❌ CORS BLOCKED:", cleanOrigin);
-    return callback(new Error("Not allowed by CORS"));
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-};
-
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
-
-// ==============================
-// 🔥 FORCE CORS HEADERS (FINAL FIX)
+// 🔥 FORCE CORS (MAIN FIX)
 // ==============================
 app.use((req, res, next) => {
   const origin = req.headers.origin;
+  const cleanOrigin = normalizeOrigin(origin);
 
-  if (allowedOrigins.includes(normalizeOrigin(origin))) {
+  if (allowedOrigins.includes(cleanOrigin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   }
 
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+  );
+
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization"
+  );
+
   res.setHeader("Access-Control-Allow-Credentials", "true");
+
+  // IMPORTANT (preflight fix)
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
 
   next();
 });
@@ -112,10 +100,9 @@ app.get("/", (req, res) => {
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
-    methods: ["GET", "POST"],
     credentials: true
   },
-  transports: ["websocket"] // ✅ FIXED (polling removed)
+  transports: ["websocket"] // ❗ polling removed
 });
 
 app.set("io", io);
@@ -136,7 +123,6 @@ io.on("connection", (socket) => {
     message: "🔥 Connected to realtime server!"
   });
 
-  // JOIN QUEUE
   socket.on("joinQueue", (userId) => {
     if (!userId) return;
 
@@ -156,15 +142,12 @@ io.on("connection", (socket) => {
     });
   });
 
-  // NOTIFICATION
   socket.on("sendNotification", (msg) => {
     io.emit("notification", { message: msg });
   });
 
-  // DISCONNECT
   socket.on("disconnect", () => {
     connectedUsers = Math.max(connectedUsers - 1, 0);
-
     io.emit("users", { total: connectedUsers });
 
     console.log("❌ User disconnected:", socket.id);
@@ -194,7 +177,7 @@ app.use((err, req, res, next) => {
 });
 
 // ==============================
-// 🚀 START SERVER
+// 🚀 START
 // ==============================
 const PORT = process.env.PORT || 5000;
 

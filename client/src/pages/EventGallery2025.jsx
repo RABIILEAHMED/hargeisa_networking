@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { io } from "socket.io-client";
+import socket from "../socket";
 
 import {
   getImages,
@@ -11,7 +11,8 @@ import {
 import GalleryCard from "../components/gallery/GalleryCard";
 import GalleryModal from "../components/gallery/GalleryModal";
 
-const socket = io("https://hargeisa-connect.onrender.com");
+// ✅ SOCKET FIX (Render compatible)
+
 
 export default function EventGallery2025() {
   const [images, setImages] = useState([]);
@@ -19,25 +20,34 @@ export default function EventGallery2025() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // 📥 FETCH IMAGES
+  // 📥 FETCH IMAGES (SAFE)
   const fetchData = async () => {
     try {
       setLoading(true);
       const res = await getImages();
-      setImages(res.data);
+
+      // ✅ FIX: ensure array
+      const data = res?.data;
+      setImages(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Fetch error:", err);
+      setImages([]); // fallback
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
+  // ✅ SINGLE useEffect (FIXED)
+useEffect(() => {
   fetchData();
+
+  socket.on("connect", () => {
+    console.log("🔥 Connected:", socket.id);
+  });
 
   socket.on("galleryUpdated", fetchData);
 
-  // 🔐 CHECK ADMIN FROM TOKEN
+  // 🔐 ADMIN CHECK
   const token = localStorage.getItem("token");
   if (token) {
     try {
@@ -51,19 +61,10 @@ export default function EventGallery2025() {
   }
 
   return () => {
+    socket.off("connect");
     socket.off("galleryUpdated");
   };
 }, []);
-
-  useEffect(() => {
-    fetchData();
-
-    socket.on("galleryUpdated", fetchData);
-
-    return () => {
-      socket.off("galleryUpdated");
-    };
-  }, []);
 
   // ❤️ LIKE (optimistic update)
   const handleLike = async (id) => {
@@ -73,7 +74,7 @@ export default function EventGallery2025() {
       setImages((prev) =>
         prev.map((img) =>
           img._id === id
-            ? { ...img, likes: img.likes + 1 }
+            ? { ...img, likes: (img.likes || 0) + 1 }
             : img
         )
       );
@@ -94,8 +95,8 @@ export default function EventGallery2025() {
 
   // 🗑 DELETE (ADMIN)
   const handleDelete = async (id) => {
-    const confirm = window.confirm("Delete this image?");
-    if (!confirm) return;
+    const confirmDelete = window.confirm("Delete this image?");
+    if (!confirmDelete) return;
 
     try {
       await deleteImage(id);
@@ -107,7 +108,7 @@ export default function EventGallery2025() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white p-6 md:p-10">
-
+      
       {/* HEADER */}
       <h2 className="text-3xl md:text-4xl font-bold text-yellow-400 mb-10 text-center">
         🚀 PRO Event Gallery
@@ -129,16 +130,17 @@ export default function EventGallery2025() {
 
       {/* GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {images.map((img) => (
-        <GalleryCard
-          key={img._id}
-          img={img}
-          onClick={() => handleView(img)}
-          onLike={() => handleLike(img._id)}
-          onDelete={() => handleDelete(img._id)}
-          isAdmin={isAdmin} // 👈 DYNAMIC NOW
-      />
-        ))}
+        {Array.isArray(images) &&
+          images.map((img) => (
+            <GalleryCard
+              key={img._id}
+              img={img}
+              onClick={() => handleView(img)}
+              onLike={() => handleLike(img._id)}
+              onDelete={() => handleDelete(img._id)}
+              isAdmin={isAdmin}
+            />
+          ))}
       </div>
 
       {/* MODAL */}
