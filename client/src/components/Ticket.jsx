@@ -15,8 +15,8 @@ export default function Ticket() {
   const [queuePos, setQueuePos] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const token = localStorage.getItem("token");
-  const API = "http://localhost:5000";
+const token = localStorage.getItem("token");
+const API = "https://hargeisa-connect.onrender.com";
 
   // 🎟️ TYPES
   const ticketTypes = [
