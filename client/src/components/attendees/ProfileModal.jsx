@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { X, Briefcase, Mail } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function ProfileModal({ user, onClose }) {
   if (!user) return null;
-
-  const BASE_URL = "http://localhost:5000";
+const [imgError, setImgError] = useState(false);
+const BASE_URL = import.meta.env.VITE_API_URL;
 
   // ✅ INITIALS
   const initials =
@@ -52,24 +52,20 @@ export default function ProfileModal({ user, onClose }) {
         <div className="flex flex-col items-center text-center">
 
           {/* IMAGE */}
-          {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt="profile"
-              className="w-24 h-24 rounded-full border-4 border-yellow-400 object-cover shadow-lg"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.style.display = "none";
-              }}
-            />
-          ) : null}
-
+          {imageUrl && !imgError && (
+  <img
+    src={imageUrl}
+    alt="profile"
+    className="w-24 h-24 rounded-full border-4 border-yellow-400 object-cover shadow-lg"
+    onError={() => setImgError(true)}
+  />
+)}
           {/* FALLBACK INITIALS */}
-          {!imageUrl && (
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-2xl font-bold text-black shadow-lg">
-              {initials}
-            </div>
-          )}
+       {(!imageUrl || imgError) && (
+  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-2xl font-bold text-black shadow-lg">
+    {initials}
+  </div>
+)}
 
           <h2 className="text-xl font-bold mt-4 text-white">
             {user.name || "Unknown User"}

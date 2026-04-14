@@ -69,19 +69,20 @@ const BASE_URL = "https://hargeisa-connect.onrender.com";
       formData.append("jobTitle", form.jobTitle || "");
       formData.append("bio", form.bio || "");
       formData.append(
-        "skills",
-        form.skills ? form.skills.join(",") : ""
-      );
+  "skills",
+  JSON.stringify(form.skills || [])
+);
 
       if (file) {
         formData.append("photo", file);
       }
 
-      await axios.put(`${BASE_URL}/api/auth/profile`, formData, {
-        headers: {
-          Authorization: token,
-        },
-      });
+     await axios.put(`${BASE_URL}/api/auth/profile`, formData, {
+  headers: {
+    Authorization: token,
+    "Content-Type": "multipart/form-data",
+  },
+});
 
       alert("✅ Profile Updated Successfully");
 
@@ -174,7 +175,7 @@ const BASE_URL = "https://hargeisa-connect.onrender.com";
         {/* SKILLS */}
         <input
           placeholder="Skills (comma separated)"
-          value={form.skills ? form.skills.join(",") : ""}
+          value={form.skills ? form.skills.join(",") : " "}
           onChange={(e) =>
             setForm({
               ...form,
