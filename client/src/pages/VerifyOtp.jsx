@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import API from "../api/api";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 export default function VerifyOtp() {
   const [otp, setOtp] = useState("");
   const [msg, setMsg] = useState("");
+
+  const API = "http://localhost:5000";
   const navigate = useNavigate();
 
   const handleVerify = async (e) => {
@@ -13,14 +15,14 @@ export default function VerifyOtp() {
     const email = localStorage.getItem("resetEmail");
 
     try {
-      const res = await API.post("/api/auth/verify-otp", {
-        email,
-        otp,
-      });
+      const res = await axios.post(
+        `${API}/api/auth/verify-otp`,
+        { email, otp }
+      );
 
       setMsg(res.data.msg);
 
-      // 👉 u gudub reset password
+      // 🚀 GO TO RESET PASSWORD
       setTimeout(() => {
         navigate("/reset-password");
       }, 1000);
@@ -32,7 +34,10 @@ export default function VerifyOtp() {
 
   return (
     <div className="flex items-center justify-center h-screen bg-black text-white">
-      <form onSubmit={handleVerify} className="bg-gray-900 p-6 rounded-xl w-[350px]">
+      <form
+        onSubmit={handleVerify}
+        className="bg-gray-900 p-6 rounded-xl w-[350px]"
+      >
         <h2 className="text-xl mb-4 text-yellow-400 text-center">
           🔑 Verify OTP
         </h2>
@@ -47,7 +52,11 @@ export default function VerifyOtp() {
           Verify OTP
         </button>
 
-        {msg && <p className="mt-3 text-center text-green-400">{msg}</p>}
+        {msg && (
+          <p className="mt-3 text-center text-sm text-green-400">
+            {msg}
+          </p>
+        )}
       </form>
     </div>
   );

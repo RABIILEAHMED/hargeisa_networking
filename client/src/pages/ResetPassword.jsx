@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import API from "../api/api";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 export default function ResetPassword() {
@@ -7,28 +7,20 @@ export default function ResetPassword() {
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
 
+  const API = "http://localhost:5000";
   const navigate = useNavigate();
 
+  // 💎 GET EMAIL FROM LOCAL STORAGE
   const email = localStorage.getItem("resetEmail");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const res = await API.post("/api/auth/reset-password", {
-        email,
-        otp,
-        password,
-      });
-
+      const res = await axios.post(`${API}/api/auth/reset-password`, { email, otp, password });
       setMsg(res.data.msg);
-
-      setTimeout(() => {
-        navigate("/login");
-      }, 1000);
-
+      navigate("/login");
     } catch (err) {
-      setMsg(err.response?.data?.msg || "Error resetting password");
+      setMsg(err.response?.data?.msg);
     }
   };
 
@@ -39,11 +31,10 @@ export default function ResetPassword() {
           Reset Password
         </h2>
 
-        {/* email show only */}
         <input
-          value={email || ""}
-          disabled
+          placeholder="Email"
           className="w-full p-2 mb-3 bg-gray-800 rounded"
+          onChange={(e) => setEmail(e.target.value)}
         />
 
         <input
@@ -59,11 +50,15 @@ export default function ResetPassword() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button className="w-full bg-green-500 p-2 rounded">
-          Reset Password
-        </button>
+        <button className="w-full bg-green-500 p-2 rounded hover:bg-green-400 transition">
+  Reset Password
+</button>
 
-        {msg && <p className="mt-3 text-center text-yellow-400">{msg}</p>}
+{msg && (
+  <p className="mt-3 text-center text-sm text-yellow-400">
+    {msg}
+  </p>
+)}
       </form>
     </div>
   );
